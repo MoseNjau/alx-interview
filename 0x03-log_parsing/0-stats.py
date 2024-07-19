@@ -2,6 +2,7 @@
 '''A script for parsing HTTP request logs.
 '''
 import re
+import sys
 
 
 def extract_input(input_line):
@@ -9,10 +10,10 @@ def extract_input(input_line):
     '''
     fp = (
         r'\s*(?P<ip>\S+)\s*',
-        r'\s*\[(?P<date>\d+\-\d+\-\d+ \d+:\d+:\d+\.\d+)\]',
+        r'\s*\[(?P<date>[\w:/]+\s[+\-]\d{4})\]',
         r'\s*"(?P<request>[^"]*)"\s*',
-        r'\s*(?P<status_code>\S+)',
-        r'\s*(?P<file_size>\d+)'
+        r'\s*(?P<status_code>\d{3})',
+        r'\s*(?P<file_size>\d+)\s*'
     )
     info = {
         'status_code': 0,
@@ -71,7 +72,9 @@ def run():
     }
     try:
         while True:
-            line = input()
+            line = sys.stdin.readline()
+            if not line:
+                break
             total_file_size = update_metrics(
                 line,
                 total_file_size,
