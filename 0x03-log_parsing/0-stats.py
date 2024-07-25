@@ -2,17 +2,17 @@
 '''A script for parsing HTTP request logs.
 '''
 import re
-import sys
+
 
 def extract_input(input_line):
     '''Extracts sections of a line of an HTTP request log.
     '''
     fp = (
         r'\s*(?P<ip>\S+)\s*',
-        r'\s*\[(?P<date>[\w:/]+\s[+\-]\d{4})\]',
+        r'\s*\[(?P<date>\d+\-\d+\-\d+ \d+:\d+:\d+\.\d+)\]',
         r'\s*"(?P<request>[^"]*)"\s*',
-        r'\s*(?P<status_code>\d{3})',
-        r'\s*(?P<file_size>\d+)\s*'
+        r'\s*(?P<status_code>\S+)',
+        r'\s*(?P<file_size>\d+)'
     )
     info = {
         'status_code': 0,
@@ -27,6 +27,7 @@ def extract_input(input_line):
         info['file_size'] = file_size
     return info
 
+
 def print_statistics(total_file_size, status_codes_stats):
     '''Prints the accumulated statistics of the HTTP request log.
     '''
@@ -35,6 +36,7 @@ def print_statistics(total_file_size, status_codes_stats):
         num = status_codes_stats.get(status_code, 0)
         if num > 0:
             print('{:s}: {:d}'.format(status_code, num), flush=True)
+
 
 def update_metrics(line, total_file_size, status_codes_stats):
     '''Updates the metrics from a given HTTP request log.
@@ -50,6 +52,7 @@ def update_metrics(line, total_file_size, status_codes_stats):
     if status_code in status_codes_stats.keys():
         status_codes_stats[status_code] += 1
     return total_file_size + line_info['file_size']
+
 
 def run():
     '''Starts the log parser.
@@ -68,9 +71,7 @@ def run():
     }
     try:
         while True:
-            line = sys.stdin.readline()
-            if not line:
-                break
+            line = input()
             total_file_size = update_metrics(
                 line,
                 total_file_size,
@@ -81,6 +82,7 @@ def run():
                 print_statistics(total_file_size, status_codes_stats)
     except (KeyboardInterrupt, EOFError):
         print_statistics(total_file_size, status_codes_stats)
+
 
 if __name__ == '__main__':
     run()
